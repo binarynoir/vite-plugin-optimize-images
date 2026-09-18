@@ -1,0 +1,18 @@
+{
+  "cSpell.words": [
+    "binarynoir",
+    "esbenp",
+    "mozjpeg",
+    "npmjs",
+    "premajor",
+    "preminor",
+    "prepatch",
+    "rollup",
+    "sharp",
+    "tsup",
+    "vite",
+    "webp"
+  ],
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true
+}
