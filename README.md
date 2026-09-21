@@ -4,18 +4,29 @@
 [![CI](https://github.com/binarynoir/vite-plugin-optimize-images/actions/workflows/ci.yml/badge.svg)](https://github.com/binarynoir/vite-plugin-optimize-images/actions/workflows/ci.yml)
 [![license](https://img.shields.io/npm/l/@binarynoir/vite-plugin-optimize-images.svg)](LICENSE)
 
-Re-encodes PNG, JPEG, and WebP assets with [sharp](https://sharp.pixelplumbing.com)
-as [Vite](https://vite.dev) writes them to the dist bundle — smaller images in
-your build output with no change to your source files, no separate
-build-your-own-assets step, and no manual re-compression before every commit.
+A [Vite](https://vite.dev) plugin that makes your build's images smaller,
+automatically. No config required to get started, no changes to your source
+files, and no separate compression step to remember before every commit.
 
-- **Never modifies source files** — only the copies written to `dist/` are
-  touched.
-- **Only optimizes what actually ships** — images that never make it into the
-  bundle are never processed.
-- **Keeps the original if optimization doesn't help** — a re-encode is only
-  applied when it actually shrinks the file by a meaningful amount (see
-  `minSavings`).
+## What this does
+
+When Vite builds your site, it copies your images into the `dist` folder as
+they are. This plugin re-compresses those copies on the way out using
+[sharp](https://sharp.pixelplumbing.com), so the images you actually ship end
+up smaller than the ones you started with.
+
+A few things this plugin is careful about, so it's safe to just turn on:
+
+- **Your original files are never touched.** Only the copies written to
+  `dist/` get re-encoded. Nothing in your project or Git history changes.
+- **Only images that actually ship get processed.** If an image never makes
+  it into your build output, this plugin never looks at it.
+- **You never end up with a bigger file.** If re-compressing an image
+  wouldn't save meaningful space, the original is kept instead (see
+  `minSavings` below).
+
+Add the plugin, build your site the way you normally would, and your images
+come out smaller. That's the whole idea.
 
 ## Install
 
