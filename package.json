@@ -1,6 +1,6 @@
 {
   "name": "@binarynoir/vite-plugin-optimize-images",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A Vite plugin that optimizes PNG, JPEG, and WebP images as they're written to the dist bundle, using sharp — without ever touching your source files.",
   "keywords": [
     "vite",
