@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Optimize SVG files with [SVGO](https://svgo.dev), with a new `svg` option for SVGO settings
+- Optimize the copies of images from Vite's public directory in the build output, which never pass through the bundle; on by default, turn off with `public: false`
+
+### Changed
+
+- README: replace the plugin list with a generated More from BinaryNoir section, and use a BinaryNoir logo that shows on light and dark backgrounds
+
 ## [0.1.10] - 2026-10-15
 
 ### Changed

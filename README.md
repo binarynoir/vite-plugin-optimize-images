@@ -18,15 +18,18 @@ files, and no separate compression step to remember before every commit.
 
 When Vite builds your site, it copies your images into the `dist` folder as
 they are. This plugin re-compresses those copies on the way out using
-[sharp](https://sharp.pixelplumbing.com), so the images you actually ship end
-up smaller than the ones you started with.
+[sharp](https://sharp.pixelplumbing.com) for PNG, JPEG and WebP and
+[SVGO](https://svgo.dev) for SVG, so the images you actually ship end up
+smaller than the ones you started with. That includes images in Vite's
+`public` folder, which Vite copies as they are.
 
 A few things this plugin is careful about, so it's safe to just turn on:
 
 - **Your original files are never touched.** Only the copies written to
   `dist/` get re-encoded. Nothing in your project or Git history changes.
 - **Only images that actually ship get processed.** If an image never makes
-  it into your build output, this plugin never looks at it.
+  it into your build output, this plugin never looks at it. Files in `public`
+  are read from there and only their copies in `dist/` are rewritten.
 - **You never end up with a bigger file.** If re-compressing an image
   wouldn't save meaningful space, the original is kept instead (see
   `minSavings` below).
@@ -52,8 +55,8 @@ export default defineConfig({
 });
 ```
 
-That's it — `.png`, `.jpg`/`.jpeg`, and `.webp` assets in your build output
-get re-encoded automatically. Run a build with `VITE_OPTIMIZE_VERBOSE`-style
+That's it — `.png`, `.jpg`/`.jpeg`, `.webp` and `.svg` files in your build
+output, including those copied from `public`, get optimized automatically. Run a build with `VITE_OPTIMIZE_VERBOSE`-style
 visibility by passing `verbose: true` (see below) to see what was optimized
 and by how much.
 
@@ -66,6 +69,8 @@ and by how much.
 | `png`        | —       | sharp [PNG encode options](https://sharp.pixelplumbing.com/api-output#png) override.   |
 | `jpeg`       | —       | sharp [JPEG encode options](https://sharp.pixelplumbing.com/api-output#jpeg) override. |
 | `webp`       | —       | sharp [WebP encode options](https://sharp.pixelplumbing.com/api-output#webp) override. |
+| `svg`        | —       | [SVGO options](https://svgo.dev/docs/usage/node/) override.                            |
+| `public`     | `true`  | Also optimize the `dist/` copies of images from Vite's public directory.               |
 | `verbose`    | `false` | Log progress and per-file savings to the console.                                      |
 
 Defaults, before any override:
@@ -75,6 +80,7 @@ Defaults, before any override:
   png: { quality: 80, compressionLevel: 9, adaptiveFiltering: true },
   jpeg: { quality: 85, progressive: true, mozjpeg: true },
   webp: { quality: 85 },
+  svg: { multipass: true },
 }
 ```
 
@@ -91,8 +97,8 @@ optimizeImagesPlugin({
 
 Those are great, more general options if you want format conversion, resizing,
 or a wider codec set. This plugin is intentionally small: it re-encodes the
-three formats sharp handles fastest, only ever operates on what's already in
-the output bundle (so it composes cleanly with any other asset pipeline you
+formats sharp and SVGO handle well, only ever operates on what's already in
+the build output (so it composes cleanly with any other asset pipeline you
 have), and never risks producing a _larger_ file than it started with.
 
 ## Releasing
@@ -144,7 +150,7 @@ Pull requests are welcome too.
 
 <p align="center">
   <a href="https://binarynoir.tech">
-    <img alt="BinaryNoir" src="https://binarynoir.tech/logo-horizontal.svg" width="320">
+    <img alt="BinaryNoir" src="https://binarynoir.tech/logo-horizontal.png" width="320">
   </a>
 </p>
 

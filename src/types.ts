@@ -1,3 +1,7 @@
+import type { Config as SvgoConfig } from "svgo";
+
+export type { SvgoConfig };
+
 export interface PngEncodeOptions {
   quality?: number;
   compressionLevel?: number;
@@ -38,6 +42,20 @@ export interface OptimizeImagesOptions {
 
   /** sharp WebP encode options. */
   webp?: WebpEncodeOptions;
+
+  /**
+   * SVGO options, merged over `{ multipass: true }` (which keeps SVGO's
+   * default plugin preset).
+   */
+  svg?: SvgoConfig;
+
+  /**
+   * Also optimize the copies of images from Vite's public directory that
+   * end up in the build output. Files in the public directory itself are
+   * never changed.
+   * @default true
+   */
+  public?: boolean;
 
   /**
    * Log progress and per-file savings to the console.

@@ -63,7 +63,8 @@
     "vite": "^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0"
   },
   "dependencies": {
-    "sharp": "^0.35.4"
+    "sharp": "^0.35.4",
+    "svgo": "^4.1.0"
   },
   "devDependencies": {
     "@types/node": "^26.6.2",

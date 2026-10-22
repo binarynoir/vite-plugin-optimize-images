@@ -1,6 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { optimizeImagesPlugin } from "../src/plugin.js";
 import type { Plugin } from "vite";
+import fs from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
 
 type MockAsset = { type: "asset"; source: string | Buffer } | null | undefined;
 
@@ -145,6 +148,98 @@ describe("optimizeImagesPlugin", () => {
       };
       await runGenerateBundle(plugin, mockBundle);
       expect(mockBundle["test.gif"]).toBeDefined();
+    });
+  });
+
+  describe("SVG optimization", () => {
+    const bloatedSvg =
+      '<?xml version="1.0" encoding="UTF-8"?>\n<!-- exported -->\n' +
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">' +
+      '<g id="layer"><path d="M 0.000000 0.000000 L 10.000000 10.000000" stroke="black"/></g>'.repeat(
+        200,
+      ) +
+      "</svg>";
+
+    it("minifies SVG assets given as a buffer", async () => {
+      const plugin = optimizeImagesPlugin({ minSize: 1 });
+      const mockBundle: Record<string, MockAsset> = {
+        "logo.svg": { type: "asset" as const, source: Buffer.from(bloatedSvg) },
+      };
+      await runGenerateBundle(plugin, mockBundle);
+      const out = mockBundle["logo.svg"]!.source;
+      expect(out.length).toBeLessThan(bloatedSvg.length);
+      expect(out.toString()).toContain("<svg");
+    });
+
+    it("minifies SVG assets given as a string", async () => {
+      const plugin = optimizeImagesPlugin({ minSize: 1 });
+      const mockBundle: Record<string, MockAsset> = {
+        "logo.svg": { type: "asset" as const, source: bloatedSvg },
+      };
+      await runGenerateBundle(plugin, mockBundle);
+      expect(mockBundle["logo.svg"]!.source.length).toBeLessThan(bloatedSvg.length);
+    });
+
+    it("keeps an invalid SVG as it was", async () => {
+      const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const plugin = optimizeImagesPlugin({ minSize: 1 });
+      const source = Buffer.from("<svg <<< not xml");
+      const mockBundle: Record<string, MockAsset> = {
+        "broken.svg": { type: "asset" as const, source },
+      };
+      await runGenerateBundle(plugin, mockBundle);
+      expect(mockBundle["broken.svg"]!.source).toBe(source);
+      warnSpy.mockRestore();
+    });
+  });
+
+  describe("public directory", () => {
+    const bloatedSvg =
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">' +
+      '<!-- note --><path d="M 0.000000 0.000000 L 10.000000 10.000000"/>'.repeat(300) +
+      "</svg>";
+
+    async function setup(build: Record<string, unknown> = {}, pluginOptions = {}) {
+      const root = await fs.mkdtemp(path.join(os.tmpdir(), "optimize-images-"));
+      const publicDir = path.join(root, "public");
+      const outDir = path.join(root, "dist");
+      await fs.mkdir(path.join(publicDir, "img"), { recursive: true });
+      await fs.mkdir(path.join(outDir, "img"), { recursive: true });
+      // Vite copies public files into outDir before writeBundle runs
+      for (const dir of [publicDir, outDir]) {
+        await fs.writeFile(path.join(dir, "img", "logo.svg"), bloatedSvg);
+        await fs.writeFile(path.join(dir, "robots.txt"), "User-agent: *");
+      }
+
+      const plugin = optimizeImagesPlugin({ minSize: 1, ...pluginOptions });
+      const configResolved = plugin.configResolved as unknown as (config: unknown) => void;
+      configResolved({
+        root,
+        publicDir,
+        build: { outDir: "dist", copyPublicDir: true, write: true, ssr: false, ...build },
+      });
+      const writeBundle = plugin.writeBundle as unknown as () => Promise<void>;
+      await writeBundle();
+
+      const read = (dir: string, file: string) => fs.readFile(path.join(dir, file), "utf8");
+      return { publicDir, outDir, read };
+    }
+
+    it("optimizes the copies in outDir and leaves the public files alone", async () => {
+      const { publicDir, outDir, read } = await setup();
+      expect((await read(outDir, "img/logo.svg")).length).toBeLessThan(bloatedSvg.length);
+      expect(await read(publicDir, "img/logo.svg")).toBe(bloatedSvg);
+      expect(await read(outDir, "robots.txt")).toBe("User-agent: *");
+    });
+
+    it("skips the public directory when public is false", async () => {
+      const { outDir, read } = await setup({}, { public: false });
+      expect(await read(outDir, "img/logo.svg")).toBe(bloatedSvg);
+    });
+
+    it("skips SSR builds, which don't copy the public directory", async () => {
+      const { outDir, read } = await setup({ ssr: true });
+      expect(await read(outDir, "img/logo.svg")).toBe(bloatedSvg);
     });
   });
 
