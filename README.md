@@ -160,7 +160,7 @@ Optimize Images is one of a family of open-source tools from BinaryNoir.
 
 - [Image Fallback](https://binarynoir.tech/plugins/image-fallback): a placeholder instead of a failed build
 
-**New:** [Blog](https://binarynoir.tech/plugins/blog/): posts anywhere, a main blog and section blogs, with RSS feeds
+**New:** [Blog for Vite](https://binarynoir.tech/plugins/vite-blog): a Markdown blog for a plain Vite site, with search, feeds and a strict CSP
 
 **See them all:** VitePress plugins, Vite plugins, editor extensions and command-line tools, with documentation and live demos, at **[binarynoir.tech](https://binarynoir.tech)**.
 
