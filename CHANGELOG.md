@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-11-26
+
 ### Security
 
 - Require `sharp` 0.35.5 or later, which fixes a vulnerability in its bundled librsvg (CVE-2026-96889)
