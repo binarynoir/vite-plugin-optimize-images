@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+
+- Require `sharp` 0.35.5 or later, which fixes a vulnerability in its bundled librsvg (CVE-2026-96889)
+- Update the lockfile to `source-map-js` 1.2.4 (pulled in by `svgo`) and to patched development tooling (Vite, Vitest, esbuild, ESLint)
+
+### Changed
+
+- ESLint ignores `.vitepress/cache` and `.vitepress/dist`, so a local VitePress cache no longer fails `npm run lint`
+
 ## [0.2.1] - 2026-11-26
 
 ### Changed
